@@ -38,12 +38,16 @@ export async function GET(request: Request) {
   if (token_hash && type) {
     const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as 'email_change' | 'signup' | 'recovery' | 'email' })
     if (!error) {
-      // For email change, redirect to settings so the user sees their updated email
+      if (type === 'signup') {
+        return NextResponse.redirect(`${origin}/onboarding`)
+      }
       if (type === 'email_change') {
         return NextResponse.redirect(`${origin}/settings`)
       }
       return NextResponse.redirect(`${origin}${next}`)
     }
+    console.error('[Auth Callback] OTP verification failed:', error.message)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
   }
 
   // Handle code exchange (used for OAuth and magic link login)
@@ -52,6 +56,8 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    console.error('[Auth Callback] Code exchange failed:', error.message)
+    return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`)
   }
 
   // return the user to an error page with some instructions

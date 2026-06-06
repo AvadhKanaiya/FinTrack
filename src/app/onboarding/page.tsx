@@ -9,13 +9,21 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Coins } from 'lucide-react'
+import { useTheme } from 'next-themes'
 
 export default function OnboardingPage() {
   const [isLoading, setIsLoading] = useState(false)
+  const { setTheme } = useTheme()
 
   async function handleSubmit(formData: FormData) {
     setIsLoading(true)
     try {
+      // Apply the theme immediately via next-themes
+      const selectedTheme = formData.get('theme') as string
+      if (selectedTheme) {
+        setTheme(selectedTheme)
+      }
+
       const result = await completeOnboarding(formData)
       if (result?.error) {
         toast.error(result.error)

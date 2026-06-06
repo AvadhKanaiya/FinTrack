@@ -129,6 +129,7 @@ export function SubscriptionModal() {
                 id="sub-renewal"
                 name="renewal_date"
                 type="date"
+                min={new Date().toISOString().split('T')[0]}
                 className="col-span-3"
                 required
               />
@@ -301,6 +302,7 @@ export function EditSubscriptionModal({ subscription }: { subscription: Subscrip
                 name="renewal_date"
                 type="date"
                 defaultValue={subscription.renewal_date}
+                min={new Date().toISOString().split('T')[0]}
                 className="col-span-3"
                 required
               />

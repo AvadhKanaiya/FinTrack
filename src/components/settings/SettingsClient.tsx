@@ -95,10 +95,18 @@ const CURRENCIES = [
   { code: 'AED', label: 'AED — UAE Dirham', symbol: 'د.إ' },
 ]
 
-// ─── Root component ───────────────────────────────────────────────────────────
-
 export function SettingsClient({ user, profile }: Props) {
   const [activeTab, setActiveTab] = useState<TabId>('profile')
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search)
+      const tabParam = params.get('tab') as TabId | null
+      if (tabParam && ['profile', 'account', 'appearance', 'notifications', 'security'].includes(tabParam)) {
+        setActiveTab(tabParam)
+      }
+    }
+  }, [])
 
   return (
     <div className="flex flex-col md:flex-row gap-6 min-h-[600px]">

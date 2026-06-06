@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { sendEmail } from '@/lib/notifications/email'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 
@@ -70,14 +72,69 @@ export async function updateEmail(formData: FormData) {
   if (!email) return { error: 'Email is required.' }
   if (email === user.email) return { error: 'This is already your current email.' }
 
-  const { error } = await supabase.auth.updateUser(
-    { email },
-    { emailRedirectTo: `${getBaseUrl()}/auth/callback` }
-  )
-  if (error) return { error: error.message }
+  const adminClient = createAdminClient()
+
+  // Generate the email change verification link via admin client
+  const { data: linkData, error: linkError } = await adminClient.auth.admin.generateLink({
+    type: 'email_change_new',
+    email: user.email!,
+    newEmail: email,
+    options: {
+      redirectTo: `${getBaseUrl()}/auth/callback`,
+    },
+  })
+
+  if (linkError) {
+    return { error: linkError.message }
+  }
+
+  const tokenHash = linkData?.properties?.hashed_token
+  if (!tokenHash) {
+    return { error: 'Failed to generate email change verification link.' }
+  }
+
+  const actionLink = `${getBaseUrl()}/auth/callback?token_hash=${tokenHash}&type=email_change`
+
+  // Send the verification email using custom SMTP settings
+  const emailHtml = `
+    <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 580px; margin: 0 auto; padding: 32px; border: 1px solid #e4e4e7; border-radius: 16px; background-color: #ffffff; color: #18181b;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; height: 48px; width: 48px; align-items: center; justify-content: center; background-color: #4f46e5; color: #ffffff; margin-bottom: 16px; border-radius: 12px;">
+          <span style="font-size: 24px; font-weight: bold; font-family: system-ui, sans-serif;">F</span>
+        </div>
+        <h1 style="font-size: 24px; font-weight: 700; color: #18181b; margin: 0;">Change Email Address</h1>
+        <p style="font-size: 14px; color: #71717a; margin: 4px 0 0 0;">Confirm your new email for FinTrack</p>
+      </div>
+      
+      <p style="font-size: 15px; line-height: 1.6; color: #3f3f46;">We received a request to change the email address associated with your FinTrack account to <strong>${email}</strong>. Please click the button below to verify this change.</p>
+      
+      <div style="text-align: center; margin: 32px 0;">
+        <a href="${actionLink}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);">Confirm Email Change</a>
+      </div>
+      
+      <p style="font-size: 13px; line-height: 1.5; color: #71717a; text-align: center;">If you did not request this change, you can safely ignore this email.</p>
+      
+      <p style="font-size: 13px; line-height: 1.5; color: #71717a; text-align: center;">If the button doesn't work, copy and paste the link below into your browser:<br/>
+      <a href="${actionLink}" style="color: #4f46e5; word-break: break-all;">${actionLink}</a></p>
+      
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 12px; color: #a1a1aa;">
+        © ${new Date().getFullYear()} FinTrack. All rights reserved.
+      </div>
+    </div>
+  `
+
+  const emailResult = await sendEmail({
+    to: email,
+    subject: 'FinTrack: Confirm your email address change',
+    html: emailHtml,
+  })
+
+  if (!emailResult?.success) {
+    return { error: 'Failed to send confirmation email. Please check your SMTP settings.' }
+  }
 
   revalidatePath('/settings')
-  return { success: true, message: 'Email address updated successfully!' }
+  return { success: true, message: 'A confirmation link has been sent to your new email. Please verify it to complete the change!' }
 }
 
 // Helper to derive base URL for email redirects
