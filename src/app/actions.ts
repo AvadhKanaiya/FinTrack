@@ -41,6 +41,7 @@ export async function createTransaction(formData: FormData) {
   // Trigger notification checks in the background
   const txAmount = parseFloat(amount)
   checkBudgetAndThresholds(user.id, user.email || '', {
+    type,
     amount: txAmount,
     category_id: category_id || null,
     title,
@@ -91,6 +92,7 @@ export async function updateTransaction(id: string, formData: FormData) {
   // Trigger notification checks in the background
   const txAmount = parseFloat(amount)
   checkBudgetAndThresholds(user.id, user.email || '', {
+    type,
     amount: txAmount,
     category_id: category_id || null,
     title,

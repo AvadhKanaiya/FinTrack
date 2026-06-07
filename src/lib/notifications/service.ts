@@ -88,6 +88,7 @@ export async function triggerNotification({
 }
 
 interface TransactionInfo {
+  type: string
   amount: number
   category_id: string | null
   title: string
@@ -114,7 +115,7 @@ export async function checkBudgetAndThresholds(
     const currency = profile.currency || 'USD'
 
     // ─── CHECK LARGE TRANSACTION ALERT ──────────────────────────────────────────
-    if (profile.notif_large_transactions) {
+    if (profile.notif_large_transactions && tx.type === 'expense') {
       const threshold = Number(profile.large_transaction_threshold ?? 500)
       if (tx.amount >= threshold) {
         const title = 'Large Transaction Alert 💸'
@@ -163,7 +164,7 @@ export async function checkBudgetAndThresholds(
     }
 
     // ─── CHECK BUDGET ALERTS ─────────────────────────────────────────────────────
-    if (profile.notif_budget_alerts && tx.category_id) {
+    if (profile.notif_budget_alerts && tx.category_id && tx.type === 'expense') {
       // 1. Fetch budget for this category
       const { data: budget } = await supabase
         .from('budgets')
