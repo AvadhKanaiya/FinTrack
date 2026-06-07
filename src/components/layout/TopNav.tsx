@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Search, Menu } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { GlobalSearch } from './GlobalSearch'
 import { NotificationCenter } from '@/components/layout/NotificationCenter'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
@@ -24,6 +25,7 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
   const [fullName, setFullName] = useState<string | null>(null)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -75,17 +77,33 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
       </Button>
 
       <div className="flex flex-1 items-center gap-4">
-        <form className="relative w-full max-w-md hidden md:flex" onSubmit={(e) => e.preventDefault()}>
+        <button
+          type="button"
+          onClick={() => setSearchOpen(true)}
+          className="relative w-full max-w-md hidden md:flex items-center text-left text-muted-foreground hover:text-foreground border border-input bg-transparent rounded-md px-3 py-1.5 text-sm shadow-sm transition-colors focus-visible:outline-none pl-9 select-none cursor-pointer"
+        >
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <input
-            type="search"
-            placeholder="Search transactions..."
-            className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
-          />
-        </form>
+          <span className="flex-1">Search transactions, goals, budgets...</span>
+          <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-0.5 rounded border bg-zinc-100 dark:bg-zinc-800 dark:border-zinc-700 px-1.5 font-mono text-[9px] font-medium opacity-100 text-zinc-500">
+            <span>Ctrl</span>
+            <span>+</span>
+            <span>K</span>
+          </kbd>
+        </button>
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Mobile Search Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="rounded-full md:hidden"
+          onClick={() => setSearchOpen(true)}
+          aria-label="Search"
+        >
+          <Search className="h-5 w-5" />
+        </Button>
+
         {/* Theme toggle */}
         <ThemeToggle />
 
@@ -145,6 +163,8 @@ export function TopNav({ onMenuClick }: { onMenuClick?: () => void }) {
           </DropdownMenu>
         )}
       </div>
+
+      <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </header>
   )
 }

@@ -1,5 +1,7 @@
 # FinTrack 📊 — Personalized Expense Tracker & Financial Planner
 
+> 📖 **Check out the [FinTrack Technical Walkthrough](./walkthrough.md) for a deep dive into the system architecture and notification/search pipelines.**
+
 FinTrack is a premium, responsive personal finance tracking application designed to help users budget, monitor expenses, set savings goals, and visualize their spending behaviors. It is built using a modern tech stack (Next.js 16, React 19, Tailwind CSS v4, and Supabase) and features robust notifications (in-app and email), recurring subscription tracking, and automated financial summary reports.
 
 ---
