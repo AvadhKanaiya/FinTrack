@@ -11,7 +11,16 @@ import { toast } from 'sonner'
 import { Coins } from 'lucide-react'
 import { useTheme } from 'next-themes'
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+  JPY: '¥',
+}
+
 export default function OnboardingPage() {
+  const [selectedCurrency, setSelectedCurrency] = useState('USD')
   const [isLoading, setIsLoading] = useState(false)
   const { setTheme } = useTheme()
 
@@ -67,7 +76,7 @@ export default function OnboardingPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="currency">Preferred Currency</Label>
-                  <Select name="currency" defaultValue="USD">
+                  <Select name="currency" value={selectedCurrency} onValueChange={(v) => setSelectedCurrency(v ?? 'USD')}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
@@ -99,7 +108,7 @@ export default function OnboardingPage() {
               <div className="space-y-2">
                 <Label htmlFor="monthlyIncome">Average Monthly Income</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                  <span className="absolute left-3 top-2.5 text-muted-foreground">{CURRENCY_SYMBOLS[selectedCurrency] || '$'}</span>
                   <Input id="monthlyIncome" name="monthlyIncome" type="number" placeholder="5000" className="pl-7" required />
                 </div>
                 <p className="text-xs text-muted-foreground">Used for budget calculations and saving goals.</p>

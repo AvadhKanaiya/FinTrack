@@ -338,6 +338,11 @@ function AccountSection({ user, profile }: { user: UserData; profile: Profile | 
   // ── Email action ───────────────────────────────────────────────────────────
   const [emailState, emailAction, emailPending] = useActionState(
     async (_prev: ActionState, fd: FormData): Promise<ActionState> => {
+      const email = (fd.get('email') as string)?.trim()
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      if (!email || !emailRegex.test(email)) {
+        return { error: 'Please enter a valid email address.', ts: Date.now() }
+      }
       const result = await updateEmail(fd)
       return { ...result, ts: Date.now() }
     },

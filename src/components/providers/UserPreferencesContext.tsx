@@ -9,6 +9,19 @@ export type DateFormat = 'MMM_d_yyyy' | 'dd_MM_yyyy' | 'MM_dd_yyyy' | 'yyyy_MM_d
 export type NumberFormat = 'comma' | 'dot' | 'space'
 export type Currency = string // ISO 4217 code
 
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  INR: '₹',
+  JPY: '¥',
+  CAD: 'CA$',
+  AUD: 'A$',
+  CHF: 'Fr',
+  SGD: 'S$',
+  AED: 'د.إ',
+}
+
 export interface UserPreferences {
   currency: Currency
   dateFormat: DateFormat
@@ -21,9 +34,10 @@ interface UserPreferencesContextValue extends UserPreferences {
   /** Format a date string (ISO yyyy-MM-dd) using the saved dateFormat */
   formatDate: (isoDate: string) => string
   /** Format a number using the saved numberFormat and currency */
-  formatAmount: (amount: number, showCurrency?: boolean) => string
+  formatAmount: (amount: number, showCurrency?: boolean, decimals?: number) => string
   /** Format a plain number (no currency) */
   formatNumber: (n: number, decimals?: number) => string
+  currencySymbol: string
 }
 
 // ─── Date format map ──────────────────────────────────────────────────────────
@@ -37,7 +51,7 @@ const DATE_FORMAT_PATTERNS: Record<DateFormat, string> = {
 
 // ─── Number formatter ─────────────────────────────────────────────────────────
 
-function buildNumberFormatter(fmt: NumberFormat, currency: Currency, showCurrency: boolean) {
+function buildNumberFormatter(fmt: NumberFormat, currency: Currency, showCurrency: boolean, decimals = 2) {
   const localeMap: Record<NumberFormat, string> = {
     comma: 'en-US',  // 1,234.56
     dot:   'de-DE',  // 1.234,56
@@ -47,8 +61,8 @@ function buildNumberFormatter(fmt: NumberFormat, currency: Currency, showCurrenc
   return new Intl.NumberFormat(locale, {
     style: showCurrency ? 'currency' : 'decimal',
     currency: showCurrency ? currency : undefined,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
   })
 }
 
@@ -96,7 +110,7 @@ export function UserPreferencesProvider({ children, initialPreferences }: Provid
     }).format(n)
   }, [prefs.numberFormat])
 
-  const formatAmount = useCallback((amount: number, showCurrency = true): string => {
+  const formatAmount = useCallback((amount: number, showCurrency = true, decimals = 2): string => {
     const cleanFormatted = (val: string) => {
       return val
         .replace(/US[\s\u00a0]*\$/gi, '$')
@@ -104,15 +118,17 @@ export function UserPreferencesProvider({ children, initialPreferences }: Provid
         .replace(/USD/gi, '$')
     }
     try {
-      return cleanFormatted(buildNumberFormatter(prefs.numberFormat, prefs.currency, showCurrency).format(amount))
+      return cleanFormatted(buildNumberFormatter(prefs.numberFormat, prefs.currency, showCurrency, decimals).format(amount))
     } catch {
       // Fallback if currency code is invalid
-      return cleanFormatted(buildNumberFormatter(prefs.numberFormat, 'USD', showCurrency).format(amount))
+      return cleanFormatted(buildNumberFormatter(prefs.numberFormat, 'USD', showCurrency, decimals).format(amount))
     }
   }, [prefs.numberFormat, prefs.currency])
 
+  const currencySymbol = CURRENCY_SYMBOLS[prefs.currency] || '$'
+
   return (
-    <UserPreferencesContext.Provider value={{ ...prefs, setPreferences, formatDate, formatAmount, formatNumber }}>
+    <UserPreferencesContext.Provider value={{ ...prefs, currencySymbol, setPreferences, formatDate, formatAmount, formatNumber }}>
       {children}
     </UserPreferencesContext.Provider>
   )

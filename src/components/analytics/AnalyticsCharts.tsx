@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import {
   BarChart,
   Bar,
@@ -14,6 +15,7 @@ import {
   Legend,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 
 interface CategoryData {
   name: string
@@ -46,6 +48,14 @@ const tooltipStyle = {
 }
 
 export function AnalyticsCharts({ categoryData, monthlyData }: AnalyticsChartsProps) {
+  const { formatAmount } = useUserPreferences()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
+
   const hasCategory = categoryData.length > 0
   const hasMonthly = monthlyData.some((m) => m.income > 0 || m.expenses > 0)
 
@@ -59,13 +69,17 @@ export function AnalyticsCharts({ categoryData, monthlyData }: AnalyticsChartsPr
         </CardHeader>
         <CardContent>
           <div className="h-[320px] w-full">
-            {hasMonthly ? (
+            {!mounted ? (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                Loading comparison chart...
+              </div>
+            ) : hasMonthly ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={monthlyData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="currentColor" className="text-zinc-200 dark:text-zinc-800 opacity-50" />
                   <XAxis dataKey="name" stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickMargin={8} />
-                  <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} tickMargin={8} />
-                  <Tooltip contentStyle={tooltipStyle} formatter={(value) => typeof value === 'number' ? [`$${value.toFixed(2)}`, ''] : [value, '']} />
+                  <YAxis stroke="#888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => formatAmount(v, true, 0)} tickMargin={8} />
+                  <Tooltip contentStyle={tooltipStyle} formatter={(value) => typeof value === 'number' ? [formatAmount(value), ''] : [value, '']} />
                   <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '16px' }} />
                   <Bar dataKey="income" name="Income" fill="#22c55e" radius={[6, 6, 0, 0]} maxBarSize={48} />
                   <Bar dataKey="expenses" name="Expenses" fill="#6366f1" radius={[6, 6, 0, 0]} maxBarSize={48} />
@@ -88,7 +102,11 @@ export function AnalyticsCharts({ categoryData, monthlyData }: AnalyticsChartsPr
         </CardHeader>
         <CardContent>
           <div className="h-[300px] w-full">
-            {hasCategory ? (
+            {!mounted ? (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                Loading category chart...
+              </div>
+            ) : hasCategory ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
@@ -111,7 +129,7 @@ export function AnalyticsCharts({ categoryData, monthlyData }: AnalyticsChartsPr
                   </Pie>
                   <Tooltip
                     contentStyle={tooltipStyle}
-                    formatter={(value) => typeof value === 'number' ? [`$${value.toFixed(2)}`, ''] : [value, '']}
+                    formatter={(value) => typeof value === 'number' ? [formatAmount(value), ''] : [value, '']}
                   />
                   <Legend
                     iconType="circle"
@@ -151,7 +169,7 @@ export function AnalyticsCharts({ categoryData, monthlyData }: AnalyticsChartsPr
                         />
                         <span className="font-medium truncate max-w-[140px]">{cat.name}</span>
                       </div>
-                      <span className="text-muted-foreground tabular-nums">${cat.total.toFixed(2)}</span>
+                      <span className="text-muted-foreground tabular-nums">{formatAmount(cat.total)}</span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-zinc-100 dark:bg-zinc-800 overflow-hidden">
                       <div

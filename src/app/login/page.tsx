@@ -17,6 +17,16 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+
+    if (authMode === 'signup' || authMode === 'forgot_password') {
+      const email = (formData.get('email') as string)?.trim()
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+      if (!email || !emailRegex.test(email)) {
+        toast.error('Please enter a valid email address.')
+        return
+      }
+    }
+
     setIsLoading(true)
     try {
       let result: any

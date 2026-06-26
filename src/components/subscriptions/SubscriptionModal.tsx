@@ -19,6 +19,7 @@ import { Plus, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { createSubscription, updateSubscription, deleteSubscription } from '@/app/(app)/subscriptions/actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 
 const initialState = { error: undefined as string | undefined, success: false }
 
@@ -32,6 +33,7 @@ interface Subscription {
 
 // ─── Add Subscription Modal ──────────────────────────────────────────────────
 export function SubscriptionModal() {
+  const { currencySymbol } = useUserPreferences()
   const [open, setOpen] = useState(false)
   const [billingCycle, setBillingCycle] = useState('monthly')
   const formRef = useRef<HTMLFormElement>(null)
@@ -89,7 +91,7 @@ export function SubscriptionModal() {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="sub-amount" className="text-right">Amount</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="sub-amount"
                   name="amount"
@@ -172,6 +174,7 @@ export function SubscriptionModal() {
 
 // ─── Edit Subscription Modal ──────────────────────────────────────────────────
 export function EditSubscriptionModal({ subscription }: { subscription: Subscription }) {
+  const { currencySymbol } = useUserPreferences()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [billingCycle, setBillingCycle] = useState(subscription.billing_cycle)
@@ -261,7 +264,7 @@ export function EditSubscriptionModal({ subscription }: { subscription: Subscrip
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-sub-amount" className="text-right">Amount</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="edit-sub-amount"
                   name="amount"

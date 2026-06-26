@@ -19,6 +19,7 @@ import { Plus, Loader2 } from 'lucide-react'
 import { createBudget } from '@/app/actions'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
+import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 
 interface Category {
   id: string
@@ -32,6 +33,7 @@ interface Category {
 const initialState = { error: undefined as string | undefined, success: false }
 
 export function BudgetModal() {
+  const { currencySymbol } = useUserPreferences()
   const [open, setOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
@@ -167,7 +169,7 @@ export function BudgetModal() {
                 Monthly Limit
               </Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="monthly_limit"
                   name="monthly_limit"

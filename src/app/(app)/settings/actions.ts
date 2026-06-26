@@ -72,6 +72,12 @@ export async function updateEmail(formData: FormData) {
   if (!email) return { error: 'Email is required.' }
   if (email === user.email) return { error: 'This is already your current email.' }
 
+  // Validate email format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!emailRegex.test(email)) {
+    return { error: 'Please enter a valid email address.' }
+  }
+
   const adminClient = createAdminClient()
 
   // Generate the email change verification link via admin client

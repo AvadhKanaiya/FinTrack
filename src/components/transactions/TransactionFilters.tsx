@@ -56,7 +56,7 @@ function SortIcon({ field, sortField, sortDir }: { field: SortField; sortField: 
 // ─── Main component ──────────────────────────────────────────────────────────
 
 export function TransactionFilters({ transactions, categories }: Props) {
-  const { formatDate, formatAmount } = useUserPreferences()
+  const { formatDate, formatAmount, currencySymbol } = useUserPreferences()
   // ── Sort state ─────────────────────────────────────────────────────────────
   const [sortField, setSortField] = useState<SortField>('transaction_date')
   const [sortDir, setSortDir] = useState<SortDir>('desc')
@@ -324,7 +324,7 @@ export function TransactionFilters({ transactions, categories }: Props) {
 
           {/* Amount range */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Amount range ($)</label>
+            <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Amount range ({currencySymbol})</label>
             <div className="flex items-center gap-2">
               <Input
                 id="filter-amount-min"
@@ -372,7 +372,7 @@ export function TransactionFilters({ transactions, categories }: Props) {
           )}
           {(filterMinAmount || filterMaxAmount) && (
             <FilterChip
-              label={`Amount: $${filterMinAmount || '0'} – $${filterMaxAmount || '∞'}`}
+              label={`Amount: ${currencySymbol}${filterMinAmount || '0'} – ${currencySymbol}${filterMaxAmount || '∞'}`}
               onRemove={() => { setFilterMinAmount(''); setFilterMaxAmount('') }}
             />
           )}

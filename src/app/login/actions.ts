@@ -28,11 +28,17 @@ export async function login(formData: FormData) {
 export async function signup(formData: FormData) {
   const adminClient = createAdminClient()
 
-  const email = formData.get('email') as string
+  const email = (formData.get('email') as string)?.trim()
   const password = formData.get('password') as string
 
   if (!email || !password) {
     return { error: 'Email and password are required.' }
+  }
+
+  // Validate email format (requires domain with dot, e.g. name@example.com, no name@text allowed)
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!emailRegex.test(email)) {
+    return { error: 'Please enter a valid email address.' }
   }
 
   // 1. Create the user in unconfirmed state via admin client
@@ -112,6 +118,12 @@ export async function forgotPassword(formData: FormData) {
 
   if (!email) {
     return { error: 'Email is required.' }
+  }
+
+  // Validate email format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/
+  if (!emailRegex.test(email)) {
+    return { error: 'Please enter a valid email address.' }
   }
 
   // Generate the recovery verification link via admin client

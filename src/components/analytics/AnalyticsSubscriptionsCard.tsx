@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
@@ -36,6 +37,12 @@ const tooltipStyle = {
 
 export function AnalyticsSubscriptionsCard({ subscriptions, totalExpenses }: AnalyticsSubscriptionsCardProps) {
   const { formatAmount } = useUserPreferences()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setMounted(true), 100)
+    return () => clearTimeout(timer)
+  }, [])
 
   const data = typeof window !== 'undefined' ? (() => {
     let monthlySubSum = 0
@@ -144,7 +151,11 @@ export function AnalyticsSubscriptionsCard({ subscriptions, totalExpenses }: Ana
         </CardHeader>
         <CardContent>
           <div className="h-[200px] w-full relative">
-            {hasSubscriptions ? (
+            {!mounted ? (
+              <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                Loading subscription chart...
+              </div>
+            ) : hasSubscriptions ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie

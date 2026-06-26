@@ -18,6 +18,7 @@ import { Plus, Loader2, Pencil, Trash2 } from 'lucide-react'
 import { createGoal, updateGoal, deleteGoal } from '@/app/actions'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 
 // Goal icon options
 const GOAL_ICONS = ['🎯', '🏠', '🚗', '✈️', '💎', '📱', '🎓', '💍', '🏖️', '🌍', '💰', '🏋️', '🎮', '🎵', '🛍️', '🌱', '🏆', '🚀', '💻', '🎨']
@@ -35,6 +36,7 @@ interface Goal {
 
 // ─── Add Goal Modal ──────────────────────────────────────────────────────────
 export function GoalModal() {
+  const { currencySymbol } = useUserPreferences()
   const [open, setOpen] = useState(false)
   const [selectedIcon, setSelectedIcon] = useState('🎯')
   const [showIconPicker, setShowIconPicker] = useState(false)
@@ -130,7 +132,7 @@ export function GoalModal() {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="goal-target" className="text-right">Target</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="goal-target"
                   name="target_amount"
@@ -148,7 +150,7 @@ export function GoalModal() {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="goal-current" className="text-right">Saved</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="goal-current"
                   name="current_amount"
@@ -209,6 +211,7 @@ export function GoalModal() {
 
 // ─── Edit Goal Modal ─────────────────────────────────────────────────────────
 export function EditGoalModal({ goal }: { goal: Goal }) {
+  const { currencySymbol } = useUserPreferences()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [selectedIcon, setSelectedIcon] = useState(goal.icon || '🎯')
@@ -336,7 +339,7 @@ export function EditGoalModal({ goal }: { goal: Goal }) {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-goal-target" className="text-right">Target</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="edit-goal-target"
                   name="target_amount"
@@ -354,7 +357,7 @@ export function EditGoalModal({ goal }: { goal: Goal }) {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-goal-current" className="text-right">Saved</Label>
               <div className="col-span-3 relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
                 <Input
                   id="edit-goal-current"
                   name="current_amount"

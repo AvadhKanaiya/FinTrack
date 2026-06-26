@@ -20,6 +20,7 @@ import { createTransaction, updateTransaction, deleteTransaction } from '@/app/a
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { useUserPreferences } from '@/components/providers/UserPreferencesContext'
 
 interface Category {
   id: string
@@ -44,6 +45,7 @@ const initialState = { error: undefined as string | undefined, success: false }
 
 // ─── Add Transaction button + modal ────────────────────────────────────────
 export function TransactionModal() {
+  const { currencySymbol } = useUserPreferences()
   const [open, setOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedType, setSelectedType] = useState('expense')
@@ -134,16 +136,19 @@ export function TransactionModal() {
             {/* Amount */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="add-amount" className="text-right">Amount</Label>
-              <Input
-                id="add-amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0.00"
-                className="col-span-3"
-                required
-              />
+              <div className="col-span-3 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
+                <Input
+                  id="add-amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="0.00"
+                  className="pl-7"
+                  required
+                />
+              </div>
             </div>
 
             {/* Title */}
@@ -284,6 +289,7 @@ export function TransactionModal() {
 
 // ─── Edit Transaction button + modal ───────────────────────────────────────
 export function EditTransactionModal({ transaction }: { transaction: Transaction }) {
+  const { currencySymbol } = useUserPreferences()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [categories, setCategories] = useState<Category[]>([])
@@ -403,16 +409,19 @@ export function EditTransactionModal({ transaction }: { transaction: Transaction
             {/* Amount */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="edit-amount" className="text-right">Amount</Label>
-              <Input
-                id="edit-amount"
-                name="amount"
-                type="number"
-                step="0.01"
-                min="0.01"
-                defaultValue={transaction.amount}
-                className="col-span-3"
-                required
-              />
+              <div className="col-span-3 relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">{currencySymbol}</span>
+                <Input
+                  id="edit-amount"
+                  name="amount"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  defaultValue={transaction.amount}
+                  className="pl-7"
+                  required
+                />
+              </div>
             </div>
 
             {/* Title */}
